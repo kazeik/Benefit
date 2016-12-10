@@ -140,9 +140,6 @@ NSString *versionUpdate = @"getmbVersionInfo.php";
 //    [YCXMenu setHasShadow:YES];
     [YCXMenu setBackgrounColorEffect:YCXMenuBackgrounColorEffectSolid];
     [YCXMenu setTintColor:[UIColor whiteColor]];
-//    [YCXMenu showMenuInView:self.view fromRect:btn.frame menuItems:self.items selected:^(NSInteger index, YCXMenuItem *item) {
-//        NSLog(@"%@",item);
-//    }];
 
     [YCXMenu showMenuInView:self.view fromRect:btn.frame menuItems:self.items selected:^(NSInteger index, YCXMenuItem *item) {
         NSLog(@"%@",item);
