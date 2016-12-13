@@ -10,6 +10,7 @@
 #import "MenuListModel.h"
 #import "MenuSubListModel.h"
 #import "YCXMenu.h"
+#import<CommonCrypto/CommonDigest.h>
 
 #define IOS9_WIDTH 640/2
 #define IOS9_HIGHT 1136/2
@@ -36,7 +37,7 @@ NSString *versionUpdate = @"getmbVersionInfo.php";
     
     webView = [[UIWebView alloc]initWithFrame:CGRectMake(0, ACTIONBAR_HIGHT, IOS9_WIDTH, IOS9_HIGHT-ACTIONBAR_HIGHT-MENU_HIGHT)];
     webView.scalesPageToFit=YES;//自动对页面进行缩放以适应屏幕
-    webView.delegate = self;
+//    webView.delegate = self;
     [self.view addSubview:webView];
     
     
@@ -44,12 +45,30 @@ NSString *versionUpdate = @"getmbVersionInfo.php";
     [self netRequest:menuList];
     
 }
+#pragma 生成md5
+- (NSString *) md5:(NSString *) input {
+    const char *cStr = [input UTF8String];
+    unsigned char digest[CC_MD5_DIGEST_LENGTH];
+    CC_MD5( cStr, strlen(cStr), digest); // This is the md5 call
+    NSMutableString *output = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
+    for(int i = 0; i < CC_MD5_DIGEST_LENGTH; i++)
+        [output appendFormat:@"%02x", digest[i]];
+    return output;
+}
+
 /**
  * 打开网页
  */
 -(void) openUrl:(NSString *)url
 {
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
+}
+
+#pragma 生成随机数
+-(NSString *) getRandom
+{
+    int num = (arc4random() % 1000000);
+    return [NSString stringWithFormat:@"%.6d", num];
 }
 
 /**
