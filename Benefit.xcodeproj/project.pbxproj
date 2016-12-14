@@ -146,6 +146,7 @@
 				TargetAttributes = {
 					D6BC6A2A1DF5C45800EA1AC3 = {
 						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = PP7DH3K8F7;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -311,7 +312,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = PP7DH3K8F7;
 				INFOPLIST_FILE = Benefit/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kazeik.Benefit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -323,7 +326,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = PP7DH3K8F7;
 				INFOPLIST_FILE = Benefit/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kazeik.Benefit;
 				PRODUCT_NAME = "$(TARGET_NAME)";

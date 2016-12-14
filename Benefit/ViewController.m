@@ -12,6 +12,10 @@
 #import "YCXMenu.h"
 #import<CommonCrypto/CommonDigest.h>
 
+#include <sys/sysctl.h>
+#include <net/if.h>
+#include <net/if_dl.h>
+
 #define IOS9_WIDTH 640/2
 #define IOS9_HIGHT 1136/2
 #define MENU_HIGHT  50
@@ -40,7 +44,6 @@ NSString *versionUpdate = @"getmbVersionInfo.php";
 //    webView.delegate = self;
     [self.view addSubview:webView];
     
-    
     [self netRequest:pageIndex];
     [self netRequest:menuList];
     
@@ -56,12 +59,90 @@ NSString *versionUpdate = @"getmbVersionInfo.php";
     return output;
 }
 
+-(void)openUrl:(NSString *)url
+{
+    [self openUrl:url withType:nil];
+}
 /**
  * 打开网页
  */
--(void) openUrl:(NSString *)url
+-(void) openUrl:(NSString *)url withType:(NSString *)post
 {
-    [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
+    NSMutableURLRequest *request =[NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
+    if (post != nil || post.length !=0) {
+        request.HTTPMethod=@"POST";
+        request.HTTPBody= [[NSString stringWithFormat:@"%@%@",@"user=",post] dataUsingEncoding:NSUTF8StringEncoding];
+    }else{
+        request.HTTPMethod=@"GET";
+    }
+    [webView loadRequest:request];
+}
+#pragma 获取手机MAC
+- (NSString *)getMacAddress
+{
+    int                 mgmtInfoBase[6];
+    char                *msgBuffer = NULL;
+    size_t              length;
+    unsigned char       macAddress[6];
+    struct if_msghdr    *interfaceMsgStruct;
+    struct sockaddr_dl  *socketStruct;
+    NSString            *errorFlag = NULL;
+    
+    // Setup the management Information Base (mib)
+    mgmtInfoBase[0] = CTL_NET;        // Request network subsystem
+    mgmtInfoBase[1] = AF_ROUTE;       // Routing table info
+    mgmtInfoBase[2] = 0;
+    mgmtInfoBase[3] = AF_LINK;        // Request link layer information
+    mgmtInfoBase[4] = NET_RT_IFLIST;  // Request all configured interfaces
+    
+    // With all configured interfaces requested, get handle index
+    if ((mgmtInfoBase[5] = if_nametoindex("en0")) == 0)
+        errorFlag = @"if_nametoindex failure";
+    else
+    {
+        // Get the size of the data available (store in len)
+        if (sysctl(mgmtInfoBase, 6, NULL, &length, NULL, 0) < 0)
+            errorFlag = @"sysctl mgmtInfoBase failure";
+        else
+        {
+            // Alloc memory based on above call
+            if ((msgBuffer = malloc(length)) == NULL)
+                errorFlag = @"buffer allocation failure";
+            else
+            {
+                // Get system information, store in buffer
+                if (sysctl(mgmtInfoBase, 6, msgBuffer, &length, NULL, 0) < 0)
+                    errorFlag = @"sysctl msgBuffer failure";
+            }
+        }
+    }
+    
+    // Befor going any further...
+    if (errorFlag != NULL)
+    {
+        NSLog(@"Error: %@", errorFlag);
+        return errorFlag;
+    }
+    
+    // Map msgbuffer to interface message structure
+    interfaceMsgStruct = (struct if_msghdr *) msgBuffer;
+    
+    // Map to link-level socket structure
+    socketStruct = (struct sockaddr_dl *) (interfaceMsgStruct + 1);
+    
+    // Copy link layer address data in socket structure to an array
+    memcpy(&macAddress, socketStruct->sdl_data + socketStruct->sdl_nlen, 6);
+    
+    // Read from char array into a string object, into traditional Mac address format
+    NSString *macAddressString = [NSString stringWithFormat:@"%02x:%02x:%02x:%02x:%02x:%02x",
+                                  macAddress[0], macAddress[1], macAddress[2],
+                                  macAddress[3], macAddress[4], macAddress[5]];
+    NSLog(@"Mac Address: %@", macAddressString);
+    
+    // Release the buffer memory
+    free(msgBuffer);
+    
+    return macAddressString;
 }
 
 #pragma 生成随机数
@@ -88,7 +169,14 @@ NSString *versionUpdate = @"getmbVersionInfo.php";
         if([tag isEqualToString:pageIndex]){
             NSDictionary *dictory = [NSJSONSerialization JSONObjectWithData:nsData options:kNilOptions error:&nsError];
             NSString *va = dictory[@"url"];
-            [self openUrl:va];   // 暂时注释
+            ///----------
+            NSString *user = [[NSUserDefaults standardUserDefaults] stringForKey:@"userData"];
+            if(nil == user || user.length==0){
+                user = [self md5:[NSString stringWithFormat:@"%@%@",[self getRandom],[self getMacAddress]]];
+                [[NSUserDefaults standardUserDefaults] setObject:user forKey:@"userData"];
+            }
+//            [self openUrl:va withType:user];   // 暂时注释
+            [self openUrl:va];
         }else if([tag isEqualToString:menuList]){
             NSArray *json = [NSJSONSerialization JSONObjectWithData:nsData options:kNilOptions error:&nsError];
             listModel  =[[MenuListModel alloc]init];
