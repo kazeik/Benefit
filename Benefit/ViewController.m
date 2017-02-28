@@ -10,7 +10,7 @@
 #import "MenuListModel.h"
 #import "MenuSubListModel.h"
 #import "YCXMenu.h"
-#import<CommonCrypto/CommonDigest.h>
+#import <CommonCrypto/CommonDigest.h>
 
 #include <sys/sysctl.h>
 #include <net/if.h>
@@ -71,7 +71,9 @@ NSString *versionUpdate = @"getmbVersionInfo.php";
     NSMutableURLRequest *request =[NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
     if (post != nil || post.length !=0) {
         request.HTTPMethod=@"POST";
-        request.HTTPBody= [[NSString stringWithFormat:@"%@%@",@"user=",post] dataUsingEncoding:NSUTF8StringEncoding];
+        NSString *str =[NSString stringWithFormat:@"%@%@",@"user=",post];
+        NSData *data =[str dataUsingEncoding:NSUTF8StringEncoding];
+        request.HTTPBody=data;
     }else{
         request.HTTPMethod=@"GET";
     }
@@ -175,8 +177,8 @@ NSString *versionUpdate = @"getmbVersionInfo.php";
                 user = [self md5:[NSString stringWithFormat:@"%@%@",[self getRandom],[self getMacAddress]]];
                 [[NSUserDefaults standardUserDefaults] setObject:user forKey:@"userData"];
             }
-//            [self openUrl:va withType:user];   // 暂时注释
-            [self openUrl:va];
+            [self openUrl:va withType:user];   // 暂时注释
+//            [self openUrl:va];
         }else if([tag isEqualToString:menuList]){
             NSArray *json = [NSJSONSerialization JSONObjectWithData:nsData options:kNilOptions error:&nsError];
             listModel  =[[MenuListModel alloc]init];
